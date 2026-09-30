@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "scan2plan plan.json",
+  "type": "object",
+  "required": ["schema_version", "capture", "tier", "frame", "rooms", "walls", "warnings", "assumptions"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "capture": {"type": "string"},
+    "tier": {"enum": ["photo", "video", "lidar"]},
+    "run": {"type": "object"},
+    "frame": {
+      "type": "object",
+      "required": ["up", "floor_d"],
+      "properties": {
+        "up": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+        "floor_d": {"type": "number"},
+        "e1": {"type": "array", "items": {"type": "number"}},
+        "e2": {"type": "array", "items": {"type": "number"}}
+      }
+    },
+    "rooms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "area", "polygon"],
+        "properties": {
+          "id": {"type": "string"},
+          "label": {"type": "string"},
+          "area": {"$ref": "#/definitions/measure"},
+          "ceiling": {"$ref": "#/definitions/measure"},
+          "polygon": {"type": "array", "items": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}}
+        }
+      }
+    },
+    "walls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "a", "b", "observed"],
+        "properties": {
+          "id": {"type": "integer"},
+          "a": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+          "b": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+          "angle_deg": {"type": "number"},
+          "length": {"$ref": "#/definitions/measure"},
+          "height": {"$ref": "#/definitions/measure"},
+          "observed": {"type": "boolean"},
+          "evidence_instances": {"type": "array", "items": {"type": "integer"}}
+        }
+      }
+    },
+    "openings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "wall"],
+        "properties": {
+          "kind": {"enum": ["door", "window", "pass_through"]},
+          "wall": {"type": "integer"},
+          "s_start": {"type": "number"},
+          "s_end": {"type": "number"},
+          "width": {"$ref": "#/definitions/measure"},
+          "observed": {"type": "boolean"}
+        }
+      }
+    },
+    "adjacency": {"type": "array"},
+    "ceiling_height": {"$ref": "#/definitions/measure"},
+    "damage_regions": {"type": "array"},
+    "concealed_damage_flags": {"type": "array"},
+    "scope_items": {"type": "array"},
+    "warnings": {"type": "array", "items": {"type": "object", "required": ["code", "message"]}},
+    "assumptions": {"type": "array", "items": {"type": "object", "required": ["code", "message"]}}
+  },
+  "definitions": {
+    "measure": {
+      "type": "object",
+      "required": ["value", "ci_half", "unit", "method", "evidence"],
+      "properties": {
+        "value": {"type": "number"},
+        "ci_half": {"type": "number", "minimum": 0},
+        "unit": {"type": "string"},
+        "method": {"type": "string"},
+        "evidence": {"enum": ["measured", "inferred", "prior"]}
+      }
+    }
+  }
+}

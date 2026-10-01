@@ -10,7 +10,7 @@ requires-python = ">=3.11"
 dependencies = ["numpy", "scipy", "opencv-python", "matplotlib", "shapely", "pillow"]
 
 [project.scripts]
-floorplan-recon = "floorplan_recon.cli:main"
+floorplan = "floorplan.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["floorplan_recon*"]
+include = ["floorplan*"]

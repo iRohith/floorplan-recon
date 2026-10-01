@@ -1,0 +1,137 @@
+{
+  "experiment": "final_floorplan_cli_lidar",
+  "input": "/home/r/Projects/CozmoAI/data/single_scan_with_ceiling",
+  "n_metric_points": 4280073,
+  "n_wall_faces": 89,
+  "n_paired_wall_bodies": 26,
+  "n_room_candidates": 13,
+  "n_rooms": 13,
+  "areas_m2": [
+    10.18,
+    5.7,
+    5.08,
+    4.24,
+    4.13,
+    3.89,
+    3.34,
+    2.01,
+    1.98,
+    0.96,
+    0.67,
+    0.65,
+    0.57
+  ],
+  "sam_mode": "sam_vit_b_cuda",
+  "sam_candidates": [
+    {
+      "id": 1,
+      "seed_area": 10.6064,
+      "sam_area": 14.6088,
+      "iou": 0.6490438695163104,
+      "score": 0.93408203125,
+      "sam_clip_retained_frac": 0.9899306079348318
+    },
+    {
+      "id": 2,
+      "seed_area": 6.0832,
+      "sam_area": 6.738,
+      "iou": 0.7813159942202956,
+      "score": 0.96630859375,
+      "sam_clip_retained_frac": 0.9420042083114151
+    },
+    {
+      "id": 3,
+      "seed_area": 4.9256,
+      "sam_area": 7.0272,
+      "iou": 0.671626762139181,
+      "score": 0.96875,
+      "sam_clip_retained_frac": 1.0
+    },
+    {
+      "id": 4,
+      "seed_area": 4.4476,
+      "sam_area": 7.004,
+      "iou": 0.6015327813828597,
+      "score": 0.85888671875,
+      "sam_clip_retained_frac": 0.9953233204424858
+    },
+    {
+      "id": 5,
+      "seed_area": 3.9804,
+      "sam_area": 4.2848,
+      "iou": 0.8714790326963138,
+      "score": 0.94873046875,
+      "sam_clip_retained_frac": 1.0
+    },
+    {
+      "id": 6,
+      "seed_area": 3.9788,
+      "sam_area": 4.65,
+      "iou": 0.8076085134908665,
+      "score": 0.9189453125,
+      "sam_clip_retained_frac": 0.9955765557454509
+    },
+    {
+      "id": 7,
+      "seed_area": 3.4032,
+      "sam_area": 4.1564,
+      "iou": 0.796653674303641,
+      "score": 0.9521484375,
+      "sam_clip_retained_frac": 1.0
+    },
+    {
+      "id": 8,
+      "seed_area": 2.098,
+      "sam_area": 3.144,
+      "iou": 0.5505205868433507,
+      "score": 0.875,
+      "sam_clip_retained_frac": 0.9973307912297427
+    },
+    {
+      "id": 9,
+      "seed_area": 2.0568,
+      "sam_area": 3.6,
+      "iou": 0.5237582157095141,
+      "score": 0.95654296875,
+      "sam_clip_retained_frac": 0.9968883702839362
+    },
+    {
+      "id": 10,
+      "seed_area": 0.9296,
+      "sam_area": 2.6632,
+      "iou": 0.3490537699008711,
+      "score": 0.93017578125,
+      "sam_clip_retained_frac": 1.0
+    },
+    {
+      "id": 11,
+      "seed_area": 0.7052,
+      "sam_area": 0.6236,
+      "iou": 0.7159090909090909,
+      "score": 0.88916015625,
+      "sam_clip_retained_frac": 0.9506522972206466
+    },
+    {
+      "id": 12,
+      "seed_area": 0.6244,
+      "sam_area": 1.2668,
+      "iou": 0.4606116774791474,
+      "score": 0.89306640625,
+      "sam_clip_retained_frac": 1.0
+    },
+    {
+      "id": 13,
+      "seed_area": 0.5904,
+      "sam_area": 0.674,
+      "iou": 0.8648967551622418,
+      "score": 0.91943359375,
+      "sam_clip_retained_frac": 1.0
+    }
+  ],
+  "runtime_s": 16.11,
+  "artifacts": [
+    "plan.json",
+    "plan.png",
+    "room_evidence.png"
+  ]
+}

@@ -1,6 +1,0 @@
-{
-  "tier": "video",
-  "status": "not_implemented",
-  "error": "RGB-only metric reconstruction is not implemented in this release.",
-  "reason": "Camera-height priors cannot satisfy whole-property scale, adjacency, or calibration gates."
-}

@@ -1,0 +1,9 @@
+{
+  "tier": "photo",
+  "rooms": 4,
+  "images": 20,
+  "status": "experimental_rgb_tier",
+  "artifacts": [
+    "plan.json"
+  ]
+}

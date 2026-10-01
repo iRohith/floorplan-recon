@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0.0",
+  "capture": {
+    "id": "floorplan-video-db7xf7gs",
+    "tier": "video"
+  },
+  "rooms": [
+    {
+      "id": "room_01",
+      "label": "Floorplan-Video-Db7Xf7Gs",
+      "polygon_m": [
+        [
+          0.0,
+          0
+        ],
+        [
+          5.313172386271368,
+          0
+        ],
+        [
+          5.313172386271368,
+          3.9848792897035255
+        ],
+        [
+          0.0,
+          3.9848792897035255
+        ]
+      ],
+      "floor_area": {
+        "value": 21.1724,
+        "ci95": [
+          16.1333,
+          26.2114
+        ],
+        "unit": "m2",
+        "method": "rgb_envelope"
+      },
+      "ceiling_height": {
+        "value": 2.5,
+        "ci95": [
+          2.0,
+          3.0
+        ],
+        "unit": "m",
+        "method": "indoor_height_prior_unobserved"
+      },
+      "walls": [
+        {
+          "id": "room_01_wall_01",
+          "start_m": [
+            0.0,
+            0
+          ],
+          "end_m": [
+            5.313172386271368,
+            0
+          ],
+          "length": {
+            "value": 5.3132,
+            "ci95": [
+              4.5693,
+              6.057
+            ],
+            "unit": "m",
+            "method": "video_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_01_wall_02",
+          "start_m": [
+            5.313172386271368,
+            0
+          ],
+          "end_m": [
+            5.313172386271368,
+            3.9848792897035255
+          ],
+          "length": {
+            "value": 3.9849,
+            "ci95": [
+              3.427,
+              4.5428
+            ],
+            "unit": "m",
+            "method": "video_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_01_wall_03",
+          "start_m": [
+            5.313172386271368,
+            3.9848792897035255
+          ],
+          "end_m": [
+            0.0,
+            3.9848792897035255
+          ],
+          "length": {
+            "value": 5.3132,
+            "ci95": [
+              4.5693,
+              6.057
+            ],
+            "unit": "m",
+            "method": "video_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_01_wall_04",
+          "start_m": [
+            0.0,
+            3.9848792897035255
+          ],
+          "end_m": [
+            0.0,
+            0
+          ],
+          "length": {
+            "value": 3.9849,
+            "ci95": [
+              3.427,
+              4.5428
+            ],
+            "unit": "m",
+            "method": "video_line_geometry_camera_height_scale"
+          }
+        }
+      ],
+      "openings": [],
+      "evidence": {
+        "image_count": 430,
+        "line_evidence": 0.47,
+        "median_sharpness": 48.5
+      }
+    }
+  ],
+  "wall_bodies": [],
+  "openings": [],
+  "adjacency": [],
+  "stitched_plan": {
+    "footprint_area": {
+      "value": 21.1724,
+      "ci95": [
+        16.1334,
+        26.2114
+      ],
+      "unit": "m2",
+      "method": "sum_rgb_room_envelopes"
+    }
+  },
+  "warnings": [
+    "RGB scale uses declared camera height; intervals are intentionally wide",
+    "RGB opening detection is not validated and no openings are emitted"
+  ],
+  "provenance": {
+    "pipeline": "floorplan-recon",
+    "tier": "video",
+    "camera_height_m": 1.45
+  }
+}

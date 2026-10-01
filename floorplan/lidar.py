@@ -403,7 +403,7 @@ def select_sam_rooms(components: np.ndarray, proposals: list[np.ndarray], scores
         if eligible:
             k = max(eligible, key=lambda j: ratios[j])
             area_floor = float(math.sqrt(sam_areas[k] * sam_areas[k + 1]))
-    keep = [r for r in rows if r["seed_area"] >= 0.5 and r["sam_area"] >= area_floor and r["score"] >= 0.75]
+    keep = [r for r in rows if r["seed_area"] >= 1.0 and r["sam_area"] >= max(area_floor, 1.0) and r["score"] >= 0.75]
     keep.sort(key=lambda r: -r["seed_area"])
     out = np.zeros_like(components, np.int32); kept_scores = []
     clip_radius = max(1, int(round(0.16 * ppm)))
@@ -620,9 +620,23 @@ def polygonize(labels: np.ndarray, lo: np.ndarray, ppm: float, faces: list[dict]
             if abs(candidate.area - base_area) / max(base_area, 1e-9) <= 0.015:
                 best = candidate
         shp = best
-        ring = np.asarray(shp.exterior.coords[:-1], float)
-        if not shp.exterior.is_ccw: ring = ring[::-1]
-        rooms.append({"polygon": ring, "area": float(shp.area)})
+        ring = np.round(np.asarray(shp.exterior.coords[:-1], float), 4)
+        # Rounding to 0.1 mm for the contract can reintroduce self-touching
+        # rings, so validity is re-checked on the exact coordinates emitted.
+        if not Polygon(ring).is_valid:
+            repaired = Polygon(ring).buffer(0)
+            if repaired.is_empty:
+                continue
+            if repaired.geom_type == "MultiPolygon":
+                repaired = max(repaired.geoms, key=lambda q: q.area)
+            if repaired.geom_type != "Polygon":
+                continue
+            ring = np.round(np.asarray(repaired.exterior.coords[:-1], float), 4)
+        if not Polygon(ring).is_valid or Polygon(ring).area <= 0.5:
+            continue
+        if Polygon(ring).exterior.is_ccw if hasattr(Polygon(ring), "exterior") else False:
+            ring = ring[::-1]
+        rooms.append({"polygon": ring, "area": float(Polygon(ring).area)})
     rooms.sort(key=lambda r: -r["area"])
     return rooms
 

@@ -1,0 +1,9 @@
+{
+  "tier": "video",
+  "rooms": 1,
+  "images": 430,
+  "status": "experimental_rgb_tier",
+  "artifacts": [
+    "plan.json"
+  ]
+}

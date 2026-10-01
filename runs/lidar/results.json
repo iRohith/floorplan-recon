@@ -5,21 +5,17 @@
   "n_wall_faces": 89,
   "n_paired_wall_bodies": 26,
   "n_room_candidates": 13,
-  "n_rooms": 13,
+  "n_rooms": 9,
   "areas_m2": [
     10.18,
     5.7,
-    5.08,
+    4.92,
     4.24,
     4.13,
     3.89,
     3.34,
     2.01,
-    1.98,
-    0.96,
-    0.67,
-    0.65,
-    0.57
+    1.94
   ],
   "sam_mode": "sam_vit_b_cuda",
   "sam_candidates": [
@@ -100,35 +96,31 @@
       "seed_area": 0.9296,
       "sam_area": 2.6632,
       "iou": 0.3490537699008711,
-      "score": 0.93017578125,
-      "sam_clip_retained_frac": 1.0
+      "score": 0.93017578125
     },
     {
       "id": 11,
       "seed_area": 0.7052,
       "sam_area": 0.6236,
       "iou": 0.7159090909090909,
-      "score": 0.88916015625,
-      "sam_clip_retained_frac": 0.9506522972206466
+      "score": 0.88916015625
     },
     {
       "id": 12,
       "seed_area": 0.6244,
       "sam_area": 1.2668,
       "iou": 0.4606116774791474,
-      "score": 0.89306640625,
-      "sam_clip_retained_frac": 1.0
+      "score": 0.89306640625
     },
     {
       "id": 13,
       "seed_area": 0.5904,
       "sam_area": 0.674,
       "iou": 0.8648967551622418,
-      "score": 0.91943359375,
-      "sam_clip_retained_frac": 1.0
+      "score": 0.91943359375
     }
   ],
-  "runtime_s": 16.11,
+  "runtime_s": 12.74,
   "artifacts": [
     "plan.json",
     "plan.png",

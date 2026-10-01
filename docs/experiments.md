@@ -24,5 +24,3 @@ The checked-in run reports seven candidates before model filtering and produces 
 - Magri and Fusiello: J-Linkage / preference-set plane fitting.
 - Segment Anything: box-prompted mask proposals.
 - Standard pinhole unprojection, plane fitting, connected components and confidence propagation.
-
-No third-party submission source or prose is included in this repository.

@@ -1,0 +1,544 @@
+{
+  "schema_version": "1.0.0",
+  "capture": {
+    "id": "photo_input",
+    "tier": "photo"
+  },
+  "rooms": [
+    {
+      "id": "room_01",
+      "label": "Bathroom",
+      "polygon_m": [
+        [
+          0.0,
+          0
+        ],
+        [
+          5.328944153920684,
+          0
+        ],
+        [
+          5.328944153920684,
+          3.9967081154405126
+        ],
+        [
+          0.0,
+          3.9967081154405126
+        ]
+      ],
+      "floor_area": {
+        "value": 21.2982,
+        "ci95": [
+          13.3327,
+          29.2638
+        ],
+        "unit": "m2",
+        "method": "rgb_envelope"
+      },
+      "ceiling_height": {
+        "value": 2.5,
+        "ci95": [
+          2.0,
+          3.0
+        ],
+        "unit": "m",
+        "method": "indoor_height_prior_unobserved"
+      },
+      "walls": [
+        {
+          "id": "room_01_wall_01",
+          "start_m": [
+            0.0,
+            0
+          ],
+          "end_m": [
+            5.328944153920684,
+            0
+          ],
+          "length": {
+            "value": 5.3289,
+            "ci95": [
+              4.1566,
+              6.5013
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_01_wall_02",
+          "start_m": [
+            5.328944153920684,
+            0
+          ],
+          "end_m": [
+            5.328944153920684,
+            3.9967081154405126
+          ],
+          "length": {
+            "value": 3.9967,
+            "ci95": [
+              3.1174,
+              4.876
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_01_wall_03",
+          "start_m": [
+            5.328944153920684,
+            3.9967081154405126
+          ],
+          "end_m": [
+            0.0,
+            3.9967081154405126
+          ],
+          "length": {
+            "value": 5.3289,
+            "ci95": [
+              4.1566,
+              6.5013
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_01_wall_04",
+          "start_m": [
+            0.0,
+            3.9967081154405126
+          ],
+          "end_m": [
+            0.0,
+            0
+          ],
+          "length": {
+            "value": 3.9967,
+            "ci95": [
+              3.1174,
+              4.876
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        }
+      ],
+      "openings": [],
+      "evidence": {
+        "image_count": 5,
+        "line_evidence": 0.488,
+        "median_sharpness": 41.5
+      }
+    },
+    {
+      "id": "room_02",
+      "label": "Hallway",
+      "polygon_m": [
+        [
+          6.2289441539206845,
+          0
+        ],
+        [
+          11.58929262900541,
+          0
+        ],
+        [
+          11.58929262900541,
+          4.0202613563135445
+        ],
+        [
+          6.2289441539206845,
+          4.0202613563135445
+        ]
+      ],
+      "floor_area": {
+        "value": 21.55,
+        "ci95": [
+          13.4903,
+          29.6097
+        ],
+        "unit": "m2",
+        "method": "rgb_envelope"
+      },
+      "ceiling_height": {
+        "value": 2.5,
+        "ci95": [
+          2.0,
+          3.0
+        ],
+        "unit": "m",
+        "method": "indoor_height_prior_unobserved"
+      },
+      "walls": [
+        {
+          "id": "room_02_wall_01",
+          "start_m": [
+            6.2289441539206845,
+            0
+          ],
+          "end_m": [
+            11.58929262900541,
+            0
+          ],
+          "length": {
+            "value": 5.3603,
+            "ci95": [
+              4.1811,
+              6.5396
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_02_wall_02",
+          "start_m": [
+            11.58929262900541,
+            0
+          ],
+          "end_m": [
+            11.58929262900541,
+            4.0202613563135445
+          ],
+          "length": {
+            "value": 4.0203,
+            "ci95": [
+              3.1358,
+              4.9047
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_02_wall_03",
+          "start_m": [
+            11.58929262900541,
+            4.0202613563135445
+          ],
+          "end_m": [
+            6.2289441539206845,
+            4.0202613563135445
+          ],
+          "length": {
+            "value": 5.3603,
+            "ci95": [
+              4.1811,
+              6.5396
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_02_wall_04",
+          "start_m": [
+            6.2289441539206845,
+            4.0202613563135445
+          ],
+          "end_m": [
+            6.2289441539206845,
+            0
+          ],
+          "length": {
+            "value": 4.0203,
+            "ci95": [
+              3.1358,
+              4.9047
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        }
+      ],
+      "openings": [],
+      "evidence": {
+        "image_count": 5,
+        "line_evidence": 0.524,
+        "median_sharpness": 30.3
+      }
+    },
+    {
+      "id": "room_03",
+      "label": "Kitchen",
+      "polygon_m": [
+        [
+          12.48929262900541,
+          0
+        ],
+        [
+          17.880862507350756,
+          0
+        ],
+        [
+          17.880862507350756,
+          4.04367740875901
+        ],
+        [
+          12.48929262900541,
+          4.04367740875901
+        ]
+      ],
+      "floor_area": {
+        "value": 21.8018,
+        "ci95": [
+          13.6479,
+          29.9556
+        ],
+        "unit": "m2",
+        "method": "rgb_envelope"
+      },
+      "ceiling_height": {
+        "value": 2.5,
+        "ci95": [
+          2.0,
+          3.0
+        ],
+        "unit": "m",
+        "method": "indoor_height_prior_unobserved"
+      },
+      "walls": [
+        {
+          "id": "room_03_wall_01",
+          "start_m": [
+            12.48929262900541,
+            0
+          ],
+          "end_m": [
+            17.880862507350756,
+            0
+          ],
+          "length": {
+            "value": 5.3916,
+            "ci95": [
+              4.2054,
+              6.5777
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_03_wall_02",
+          "start_m": [
+            17.880862507350756,
+            0
+          ],
+          "end_m": [
+            17.880862507350756,
+            4.04367740875901
+          ],
+          "length": {
+            "value": 4.0437,
+            "ci95": [
+              3.1541,
+              4.9333
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_03_wall_03",
+          "start_m": [
+            17.880862507350756,
+            4.04367740875901
+          ],
+          "end_m": [
+            12.48929262900541,
+            4.04367740875901
+          ],
+          "length": {
+            "value": 5.3916,
+            "ci95": [
+              4.2054,
+              6.5777
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_03_wall_04",
+          "start_m": [
+            12.48929262900541,
+            4.04367740875901
+          ],
+          "end_m": [
+            12.48929262900541,
+            0
+          ],
+          "length": {
+            "value": 4.0437,
+            "ci95": [
+              3.1541,
+              4.9333
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        }
+      ],
+      "openings": [],
+      "evidence": {
+        "image_count": 5,
+        "line_evidence": 0.561,
+        "median_sharpness": 73.4
+      }
+    },
+    {
+      "id": "room_04",
+      "label": "Living Room",
+      "polygon_m": [
+        [
+          18.780862507350758,
+          0
+        ],
+        [
+          24.030474002381716,
+          0
+        ],
+        [
+          24.030474002381716,
+          3.9372086212732174
+        ],
+        [
+          18.780862507350758,
+          3.9372086212732174
+        ]
+      ],
+      "floor_area": {
+        "value": 20.6688,
+        "ci95": [
+          12.9387,
+          28.399
+        ],
+        "unit": "m2",
+        "method": "rgb_envelope"
+      },
+      "ceiling_height": {
+        "value": 2.5,
+        "ci95": [
+          2.0,
+          3.0
+        ],
+        "unit": "m",
+        "method": "indoor_height_prior_unobserved"
+      },
+      "walls": [
+        {
+          "id": "room_04_wall_01",
+          "start_m": [
+            18.780862507350758,
+            0
+          ],
+          "end_m": [
+            24.030474002381716,
+            0
+          ],
+          "length": {
+            "value": 5.2496,
+            "ci95": [
+              4.0947,
+              6.4045
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_04_wall_02",
+          "start_m": [
+            24.030474002381716,
+            0
+          ],
+          "end_m": [
+            24.030474002381716,
+            3.9372086212732174
+          ],
+          "length": {
+            "value": 3.9372,
+            "ci95": [
+              3.071,
+              4.8034
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_04_wall_03",
+          "start_m": [
+            24.030474002381716,
+            3.9372086212732174
+          ],
+          "end_m": [
+            18.780862507350758,
+            3.9372086212732174
+          ],
+          "length": {
+            "value": 5.2496,
+            "ci95": [
+              4.0947,
+              6.4045
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        },
+        {
+          "id": "room_04_wall_04",
+          "start_m": [
+            18.780862507350758,
+            3.9372086212732174
+          ],
+          "end_m": [
+            18.780862507350758,
+            0
+          ],
+          "length": {
+            "value": 3.9372,
+            "ci95": [
+              3.071,
+              4.8034
+            ],
+            "unit": "m",
+            "method": "photo_line_geometry_camera_height_scale"
+          }
+        }
+      ],
+      "openings": [],
+      "evidence": {
+        "image_count": 5,
+        "line_evidence": 0.398,
+        "median_sharpness": 31.2
+      }
+    }
+  ],
+  "wall_bodies": [],
+  "openings": [],
+  "adjacency": [],
+  "stitched_plan": {
+    "footprint_area": {
+      "value": 85.3188,
+      "ci95": [
+        53.4096,
+        117.228
+      ],
+      "unit": "m2",
+      "method": "sum_rgb_room_envelopes"
+    }
+  },
+  "warnings": [
+    "RGB scale uses declared camera height; intervals are intentionally wide",
+    "RGB opening detection is not validated and no openings are emitted"
+  ],
+  "provenance": {
+    "pipeline": "floorplan-recon",
+    "tier": "photo",
+    "camera_height_m": 1.45
+  }
+}

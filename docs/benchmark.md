@@ -41,6 +41,13 @@ photo set.
 The intervals are wide on purpose: RGB scale rests on the declared 1.45 m capture height,
 so the tier reports an envelope, not a survey. No openings are emitted.
 
+**Read this number correctly.** The adapter's extent prior dominates the estimate, so all
+four rooms land near 21 m² regardless of their real size, and the interval is a fixed
+fraction of the value rather than a measured spread. These are prior-driven placeholders
+carrying the correct contract shape, not measurements. The `experimental_rgb_tier` status
+and the `warnings` array in the plan say so. Camera height is declared by the operator and
+is not self-calibrated from the images.
+
 ## Video tier — `runs/video/`
 
 One walkthrough clip, decoded at 2 fps and 1280 px, then passed to the same RGB adapter.

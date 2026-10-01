@@ -1,88 +1,139 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "scan2plan plan.json",
-  "type": "object",
-  "required": ["schema_version", "capture", "tier", "frame", "rooms", "walls", "warnings", "assumptions"],
-  "properties": {
-    "schema_version": {"type": "string"},
-    "capture": {"type": "string"},
-    "tier": {"enum": ["photo", "video", "lidar"]},
-    "run": {"type": "object"},
-    "frame": {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/floorplan-recon/plan.schema.json",
+  "title": "Floor plan contract",
+  "version": "1.0.0",
+  "description": "Measured floor plan. Every physical quantity is a Measurement with a 95% interval and its method.",
+  "$defs": {
+    "Measurement": {
       "type": "object",
-      "required": ["up", "floor_d"],
-      "properties": {
-        "up": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
-        "floor_d": {"type": "number"},
-        "e1": {"type": "array", "items": {"type": "number"}},
-        "e2": {"type": "array", "items": {"type": "number"}}
-      }
-    },
-    "rooms": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "label", "area", "polygon"],
-        "properties": {
-          "id": {"type": "string"},
-          "label": {"type": "string"},
-          "area": {"$ref": "#/definitions/measure"},
-          "ceiling": {"$ref": "#/definitions/measure"},
-          "polygon": {"type": "array", "items": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}}
-        }
-      }
-    },
-    "walls": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "a", "b", "observed"],
-        "properties": {
-          "id": {"type": "integer"},
-          "a": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
-          "b": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
-          "angle_deg": {"type": "number"},
-          "length": {"$ref": "#/definitions/measure"},
-          "height": {"$ref": "#/definitions/measure"},
-          "observed": {"type": "boolean"},
-          "evidence_instances": {"type": "array", "items": {"type": "integer"}}
-        }
-      }
-    },
-    "openings": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["kind", "wall"],
-        "properties": {
-          "kind": {"enum": ["door", "window", "pass_through"]},
-          "wall": {"type": "integer"},
-          "s_start": {"type": "number"},
-          "s_end": {"type": "number"},
-          "width": {"$ref": "#/definitions/measure"},
-          "observed": {"type": "boolean"}
-        }
-      }
-    },
-    "adjacency": {"type": "array"},
-    "ceiling_height": {"$ref": "#/definitions/measure"},
-    "damage_regions": {"type": "array"},
-    "concealed_damage_flags": {"type": "array"},
-    "scope_items": {"type": "array"},
-    "warnings": {"type": "array", "items": {"type": "object", "required": ["code", "message"]}},
-    "assumptions": {"type": "array", "items": {"type": "object", "required": ["code", "message"]}}
-  },
-  "definitions": {
-    "measure": {
-      "type": "object",
-      "required": ["value", "ci_half", "unit", "method", "evidence"],
+      "additionalProperties": false,
+      "required": ["value", "ci95", "unit", "method"],
       "properties": {
         "value": {"type": "number"},
-        "ci_half": {"type": "number", "minimum": 0},
+        "ci95": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
         "unit": {"type": "string"},
-        "method": {"type": "string"},
-        "evidence": {"enum": ["measured", "inferred", "prior"]}
+        "method": {"type": "string"}
+      }
+    },
+    "Point2": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+    "Polygon": {"type": "array", "items": {"$ref": "#/$defs/Point2"}, "minItems": 3},
+    "WallEdge": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "start_m", "end_m", "length"],
+      "properties": {
+        "id": {"type": "string"},
+        "start_m": {"$ref": "#/$defs/Point2"},
+        "end_m": {"$ref": "#/$defs/Point2"},
+        "length": {"$ref": "#/$defs/Measurement"},
+        "height": {"$ref": "#/$defs/Measurement"}
+      }
+    },
+    "Room": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "label", "polygon_m", "floor_area", "ceiling_height"],
+      "properties": {
+        "id": {"type": "string"},
+        "label": {"type": "string"},
+        "polygon_m": {"$ref": "#/$defs/Polygon"},
+        "floor_area": {"$ref": "#/$defs/Measurement"},
+        "ceiling_height": {"$ref": "#/$defs/Measurement"},
+        "walls": {"type": "array", "items": {"$ref": "#/$defs/WallEdge"}},
+        "openings": {"type": "array"},
+        "segmentation_confidence": {"type": ["number", "null"]},
+        "evidence": {}
+      }
+    },
+    "WallBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "polygon_m", "thickness", "length"],
+      "properties": {
+        "id": {"type": "string"},
+        "polygon_m": {"$ref": "#/$defs/Polygon"},
+        "thickness": {"$ref": "#/$defs/Measurement"},
+        "length": {"$ref": "#/$defs/Measurement"}
+      }
+    },
+    "Opening": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "type", "width"],
+      "properties": {
+        "id": {"type": "string"},
+        "type": {"enum": ["door", "window", "passage", "door_or_passage", "unclassified"]},
+        "wall_body_id": {"type": ["string", "null"]},
+        "center_m": {"$ref": "#/$defs/Point2"},
+        "direction": {"$ref": "#/$defs/Point2"},
+        "width": {"$ref": "#/$defs/Measurement"},
+        "height": {"$ref": "#/$defs/Measurement"},
+        "classification_confidence": {"type": ["number", "null"]}
+      }
+    },
+    "Adjacency": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["room_a", "room_b"],
+      "properties": {
+        "room_a": {"type": "string"},
+        "room_b": {"type": "string"},
+        "shared_boundary_m": {"type": "number"},
+        "separation_m": {"type": "number"},
+        "via_opening_id": {"type": ["string", "null"]}
       }
     }
+  },
+  "type": "object",
+  "required": ["schema_version", "capture", "coordinate_frame", "levels", "rooms", "stitched_plan", "warnings", "provenance"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "capture": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "tier"],
+      "properties": {
+        "id": {"type": "string"},
+        "tier": {"enum": ["photo", "video", "lidar"]},
+        "input_hash": {"type": "string"}
+      }
+    },
+    "coordinate_frame": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["axes", "unit"],
+      "properties": {
+        "axes": {"type": "string"},
+        "unit": {"type": "string"},
+        "up_world": {"type": "array", "items": {"type": "number"}}
+      }
+    },
+    "levels": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "floor_elevation": {"$ref": "#/$defs/Measurement"},
+        "ceiling_elevation": {"$ref": "#/$defs/Measurement"},
+        "ceiling_height": {"$ref": "#/$defs/Measurement"}
+      }
+    },
+    "wall_direction_families_deg": {"type": "array", "items": {"type": "number"}},
+    "wall_bodies": {"type": "array", "items": {"$ref": "#/$defs/WallBody"}},
+    "openings": {"type": "array", "items": {"$ref": "#/$defs/Opening"}},
+    "rooms": {"type": "array", "items": {"$ref": "#/$defs/Room"}, "minItems": 1},
+    "adjacency": {"type": "array", "items": {"$ref": "#/$defs/Adjacency"}},
+    "stitched_plan": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["footprint_area"],
+      "properties": {
+        "footprint_polygon_m": {"$ref": "#/$defs/Polygon"},
+        "footprint_area": {"$ref": "#/$defs/Measurement"}
+      }
+    },
+    "assumptions": {"type": "array", "items": {"type": "string"}},
+    "warnings": {"type": "array", "items": {"type": "string"}},
+    "provenance": {"type": "object"}
   }
 }

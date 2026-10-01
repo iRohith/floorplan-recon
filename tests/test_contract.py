@@ -1,32 +1,56 @@
 import json
 from pathlib import Path
+import pytest
 from shapely.geometry import Polygon
 
 ROOT = Path(__file__).parents[1]
+SCHEMA = json.loads((ROOT / "schema/plan.schema.json").read_text())
+
+try:
+    from jsonschema import Draft202012Validator as _Validator
+except ImportError:  # pragma: no cover
+    from jsonschema import Draft7Validator as _Validator
 
 
-def test_checked_in_lidar_plan_is_valid():
-    plan = json.loads((ROOT / "runs/lidar/plan.json").read_text())
-    assert plan["capture"]["tier"] == "lidar"
-    assert len(plan["rooms"]) >= 3
-    for room in plan["rooms"]:
-        poly = Polygon(room["polygon_m"])
-        assert poly.buffer(0).area > 0.5
-        for field in (room["floor_area"], room["ceiling_height"]):
-            assert field["ci95"][0] <= field["value"] <= field["ci95"][1]
+def _plans():
+    return {t: json.loads((ROOT / f"runs/{t}/plan.json").read_text())
+            for t in ("lidar", "photo", "video")}
 
 
-def test_measurement_intervals_bracket_values():
-    plan = json.loads((ROOT / "runs/lidar/plan.json").read_text())
+@pytest.mark.parametrize("tier", ["lidar", "photo", "video"])
+def test_plan_conforms_to_published_schema(tier):
+    errors = sorted(_Validator(SCHEMA).iter_errors(_plans()[tier]),
+                    key=lambda e: list(e.path))
+    assert not errors, "\n".join(
+        f"{'/'.join(str(p) for p in e.path) or '<root>'}: {e.message}" for e in errors)
+
+
+@pytest.mark.parametrize("tier", ["lidar", "photo", "video"])
+def test_measurements_bracket_their_value(tier):
     found = 0
-    def walk(value):
+
+    def walk(node):
         nonlocal found
-        if isinstance(value, dict):
-            if {"value", "ci95", "unit", "method"} <= value.keys():
+        if isinstance(node, dict):
+            if {"value", "ci95", "unit", "method"} <= node.keys():
                 found += 1
-                assert value["ci95"][0] <= value["value"] <= value["ci95"][1]
-            for child in value.values(): walk(child)
-        elif isinstance(value, list):
-            for child in value: walk(child)
-    walk(plan)
-    assert found > 20
+                lo, hi = node["ci95"]
+                assert lo <= node["value"] <= hi, node
+            for child in node.values():
+                walk(child)
+        elif isinstance(node, list):
+            for child in node:
+                walk(child)
+
+    walk(_plans()[tier])
+    assert found >= 8
+
+
+def test_lidar_rooms_are_valid_and_disjoint():
+    plan = _plans()["lidar"]
+    polys = [Polygon(r["polygon_m"]) for r in plan["rooms"]]
+    assert len(polys) >= 3
+    assert all(p.is_valid for p in polys)
+    for i, a in enumerate(polys):
+        for b in polys[i + 1:]:
+            assert a.intersection(b).area == 0

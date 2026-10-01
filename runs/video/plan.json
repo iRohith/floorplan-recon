@@ -1,13 +1,35 @@
 {
   "schema_version": "1.0.0",
   "capture": {
-    "id": "floorplan-video-db7xf7gs",
+    "id": "floorplan-video-nlrottz1",
     "tier": "video"
   },
+  "coordinate_frame": {
+    "axes": "per_room_local_xy",
+    "unit": "m"
+  },
+  "levels": {
+    "ceiling_elevation": {
+      "value": 2.5,
+      "ci95": [
+        2.0,
+        3.0
+      ],
+      "unit": "m",
+      "method": "camera_height_plus_indoor_prior"
+    }
+  },
+  "wall_direction_families_deg": [
+    0.0,
+    90.0
+  ],
+  "wall_bodies": [],
+  "openings": [],
+  "adjacency": [],
   "rooms": [
     {
       "id": "room_01",
-      "label": "Floorplan-Video-Db7Xf7Gs",
+      "label": "Floorplan-Video-Nlrottz1",
       "polygon_m": [
         [
           0.0,
@@ -134,9 +156,6 @@
       }
     }
   ],
-  "wall_bodies": [],
-  "openings": [],
-  "adjacency": [],
   "stitched_plan": {
     "footprint_area": {
       "value": 21.1724,
@@ -148,13 +167,20 @@
       "method": "sum_rgb_room_envelopes"
     }
   },
+  "assumptions": [
+    "Camera height prior of 1.45 m sets metric scale",
+    "Each room resolves to a rectangular envelope, not a traced wall outline"
+  ],
   "warnings": [
     "RGB scale uses declared camera height; intervals are intentionally wide",
+    "Extent is prior-dominated: rooms of different true size can report similar areas",
     "RGB opening detection is not validated and no openings are emitted"
   ],
   "provenance": {
     "pipeline": "floorplan-recon",
+    "version": "1.0.0",
     "tier": "video",
-    "camera_height_m": 1.45
+    "camera_height_m": 1.45,
+    "image_count": 430
   }
 }

@@ -74,12 +74,23 @@ def run_image_tier(root: Path, out: Path, tier: str, camera_height: float) -> No
                       "walls": walls, "openings": [], "evidence": evidence})
         x += w + .9
     total = sum(r["floor_area"]["value"] for r in rooms)
-    plan = {"schema_version": "1.0.0", "capture": {"id": root.name, "tier": tier},
-            "rooms": rooms, "wall_bodies": [], "openings": [], "adjacency": [],
+    plan = {"schema_version": "1.0.0",
+            "capture": {"id": root.name, "tier": tier},
+            "coordinate_frame": {"axes": "per_room_local_xy", "unit": "m"},
+            "levels": {"ceiling_elevation": m(camera_height + 1.05, .20, "m",
+                                             "camera_height_plus_indoor_prior")},
+            "wall_direction_families_deg": [0.0, 90.0],
+            "wall_bodies": [], "openings": [], "adjacency": [],
+            "rooms": rooms,
             "stitched_plan": {"footprint_area": m(total, frac*1.7, "m2", "sum_rgb_room_envelopes")},
+            "assumptions": [f"Camera height prior of {camera_height:.2f} m sets metric scale",
+                            "Each room resolves to a rectangular envelope, not a traced wall outline"],
             "warnings": ["RGB scale uses declared camera height; intervals are intentionally wide",
+                         "Extent is prior-dominated: rooms of different true size can report similar areas",
                          "RGB opening detection is not validated and no openings are emitted"],
-            "provenance": {"pipeline": "floorplan-recon", "tier": tier, "camera_height_m": camera_height}}
+            "provenance": {"pipeline": "floorplan-recon", "version": "1.0.0",
+                           "tier": tier, "camera_height_m": camera_height,
+                           "image_count": sum(len(p) for _, p in groups)}}
     (out / "plan.json").write_text(json.dumps(plan, indent=2)+"\n")
     (out / "results.json").write_text(json.dumps({"tier": tier, "rooms": len(rooms),
         "images": sum(len(p) for _, p in groups), "status": "experimental_rgb_tier",

@@ -17,6 +17,8 @@ def main() -> None:
                    help="declared capture height in metres; the metric scale prior for RGB tiers")
     p.add_argument("--sam-checkpoint", type=Path, default=Path("models/sam_vit_b_01ec64.pth"))
     p.add_argument("--no-cache", action="store_true")
+    p.add_argument("--drift", choices=("on", "off", "ablate"), default="on",
+                   help="LiDAR pose drift correction; 'ablate' runs both and reports the delta")
     args = p.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
 
@@ -24,6 +26,7 @@ def main() -> None:
         from .lidar import run
         run(argparse.Namespace(input=str(args.input), out=str(args.out), state=None,
             no_cache=args.no_cache, target_frames=1250, target_points=4_500_000,
+            drift=args.drift != "off", ablate=args.drift == "ablate",
             sam_checkpoint=str(args.sam_checkpoint)))
         return
 

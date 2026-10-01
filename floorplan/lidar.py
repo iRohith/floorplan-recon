@@ -129,10 +129,78 @@ def planar_basis(up: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return e1, np.cross(up, e1)
 
 
-def fuse_capture(cap: Capture, target_frames: int = 1250, target_points: int = 4_500_000) -> dict[str, np.ndarray]:
+WALL_BAND = 0.25
+
+
+def drift_correct(cap: Capture, up: np.ndarray, target_frames: int = 260,
+                  n_chunks: int = 5) -> tuple[Capture, "DriftReport"]:
+    """Measure drift from the geometry itself, then correct the poses.
+
+    The same wall is observed in every trajectory chunk. Where chunk directions
+    and floor heights disagree, the disagreement is accumulated drift. Corrections
+    are smooth per-chunk yaw about `up` plus a height offset, applied to the poses
+    before anything is fitted. Nothing is snapped to a world axis.
+    """
+    from .drift import DriftReport, apply_drift, estimate_drift
+    step = max(1, len(cap.frames) // max(target_frames, 1))
+    idx = np.arange(0, len(cap.frames), step)
+    bounds = [b for b in np.array_split(idx, n_chunks) if len(b)]
+    wall_pts, ranges, floors = [], [], []
+    for blk in bounds:
+        chunk_wall, chunk_floor = [], []
+        for i in blk:
+            z = depth_m(cap.depth_path(int(i)))
+            h, w = z.shape
+            fx, fy, cx, cy = cap.intrinsics[i]
+            sx = w / max(2.0*cx, w); sy = h / max(2.0*cy, h)
+            fx, fy, cx, cy = fx*sx, fy*sy, cx*sx, cy*sy
+            uu, vv = np.meshgrid(np.arange(w, dtype=np.float32), np.arange(h, dtype=np.float32))
+            ok = (z > 0.2) & (z < 7.0)
+            if not ok.any():
+                continue
+            xm = (uu-cx)*z/fx; ym = (vv-cy)*z/fy
+            du = np.stack([np.gradient(xm, axis=1), np.gradient(ym, axis=1), np.gradient(z, axis=1)], -1)
+            dv = np.stack([np.gradient(xm, axis=0), np.gradient(ym, axis=0), np.gradient(z, axis=0)], -1)
+            nrm = np.cross(du, dv).reshape(-1, 3)
+            nrm /= np.linalg.norm(nrm, axis=1, keepdims=True) + 1e-12
+            pts = np.stack([xm.ravel(), ym.ravel(), z.ravel()], 1)
+            R = quat_rotation(cap.quats[i])
+            wp = pts @ R.T + cap.positions[i]
+            wn = nrm @ R.T
+            sel = ok.ravel()
+            ndu = np.abs(wn @ up)
+            vertical = wp[sel][ndu[sel] < 0.30]
+            if vertical.size:
+                chunk_wall.append(vertical)
+            fl = (wp[sel][ndu[sel] > 0.92]) @ up
+            if fl.size:
+                chunk_floor.append(float(np.median(fl)))
+        if chunk_wall:
+            # Exactly one wall point set, one frame range and one floor height
+            # per chunk, so the three lists stay index-aligned for estimate_drift.
+            wall_pts.append(np.concatenate(chunk_wall))
+            ranges.append((int(blk[0]), int(blk[-1])))
+            floors.append(float(np.median(chunk_floor)) if chunk_floor else 0.0)
+    if len(wall_pts) < 2:
+        return cap, DriftReport(applicable=False, method="insufficient chunk evidence",
+                                yaw_total_deg=0.0, floor_total_m=0.0, chunks=[],
+                                warnings=["drift skipped: fewer than two chunks with wall evidence"])
+    report = estimate_drift(wall_pts, ranges, up, np.zeros(3), floors)
+    positions, quats = apply_drift(cap.positions, cap.quats, cap.frames.astype(float), report, up)
+    moved = float(np.abs(positions - cap.positions).max())
+    report.warnings.append(f"max pose displacement {moved:.4f} m")
+    return Capture(cap.root, cap.frames, positions, quats, cap.intrinsics), report
+
+
+def fuse_capture(cap: Capture, target_frames: int = 1250, target_points: int = 4_500_000,
+                 drift: bool = True, chunk_frames: int = 400) -> dict[str, np.ndarray]:
     frame_step = max(1, math.ceil(len(cap.frames) / target_frames))
     chosen = np.arange(0, len(cap.frames), frame_step)
     points_per_frame = max(1, target_points // max(len(chosen), 1))
+    up = estimate_up(cap.positions)
+    drift_report = None
+    if drift:
+        cap, drift_report = drift_correct(cap, up)
     all_p, all_n = [], []
     for seq, i in enumerate(chosen):
         z = depth_m(cap.depth_path(int(i)))
@@ -157,7 +225,8 @@ def fuse_capture(cap: Capture, target_frames: int = 1250, target_points: int = 4
         normals /= np.linalg.norm(normals, axis=1, keepdims=True) + 1e-12
         p = np.stack([xmap.ravel()[ids], ymap.ravel()[ids], z.ravel()[ids]], axis=1)
         R = quat_rotation(cap.quats[i])
-        all_p.append(p @ R.T + cap.positions[i])
+        world_p = p @ R.T + cap.positions[i]
+        all_p.append(world_p)
         all_n.append(normals @ R.T)
         if seq and seq % 150 == 0:
             print(f"  fused {seq}/{len(chosen)} sampled frames")
@@ -165,8 +234,6 @@ def fuse_capture(cap: Capture, target_frames: int = 1250, target_points: int = 4
         raise ValueError("capture produced no valid depth points")
     P = np.concatenate(all_p).astype(np.float32)
     N = np.concatenate(all_n).astype(np.float32)
-    up = estimate_up(cap.positions)
-    e1, e2 = planar_basis(up)
     heights = P @ up
     ndu = np.abs(N @ up)
     horizontal = ndu > 0.82
@@ -199,7 +266,10 @@ def fuse_capture(cap: Capture, target_frames: int = 1250, target_points: int = 4
     trajectory = np.stack([cap.positions @ e1, cap.positions @ e2], axis=1).astype(np.float32)
     return {"P": P, "N": N, "xy": xy, "cls": cls, "up": up, "e1": e1, "e2": e2,
             "floor_h": np.float64(floor_h), "ceil_h": np.float64(ceil_h), "trajectory": trajectory,
-            "frame_step": np.int64(frame_step)}
+            "frame_step": np.int64(frame_step),
+            "drift_yaw_deg": np.float64(getattr(drift_report, "yaw_total_deg", 0.0)),
+            "drift_floor_m": np.float64(getattr(drift_report, "floor_total_m", 0.0)),
+            "drift_applicable": np.bool_(bool(getattr(drift_report, "applicable", False)))}
 
 
 def occupancy(points: np.ndarray, lo: np.ndarray, shape: tuple[int, int], ppm: float) -> np.ndarray:
@@ -796,7 +866,7 @@ def run(args: argparse.Namespace) -> None:
     elif cache.exists() and not args.no_cache:
         print(f"loading cache: {cache}"); loaded=np.load(cache); state={k:loaded[k] for k in loaded.files}
     else:
-        print(f"fusing {len(cap.frames)} depth/pose frames..."); state=fuse_capture(cap,args.target_frames,args.target_points); np.savez_compressed(cache,**state)
+        print(f"fusing {len(cap.frames)} depth/pose frames..."); state=fuse_capture(cap,args.target_frames,args.target_points,drift=getattr(args,"drift",True)); np.savez_compressed(cache,**state)
     print(f"metric points: {len(state['P']):,}; floor={float(state['floor_h']):.3f} ceiling={float(state['ceil_h']):.3f}")
     xy=state["xy"]; lo=xy.min(0)-.08; hi=xy.max(0)+.08; W=int(math.ceil((hi[0]-lo[0])*SAM_PPM)); H=int(math.ceil((hi[1]-lo[1])*SAM_PPM)); shape=(H,W)
     density=occupancy(xy,lo,shape,SAM_PPM); topdown=(255-255*np.log1p(density)/max(np.log1p(density.max()),1e-6)).astype(np.uint8)
@@ -811,6 +881,38 @@ def run(args: argparse.Namespace) -> None:
     rooms=polygonize(labels,lo,SAM_PPM,faces)
     if not rooms: raise RuntimeError("no valid rooms reconstructed")
     elapsed=time.time()-started; plan=assemble_plan(cap,state,rooms,families,wall_bodies,scores,sam_mode,elapsed)
+    drift_summary = {"on": bool(getattr(args, "drift", True)),
+                     "yaw_deg": float(state.get("drift_yaw_deg", 0.0)),
+                     "floor_offset_m": float(state.get("drift_floor_m", 0.0)),
+                     "applicable": bool(state.get("drift_applicable", False)),
+                     "ablation": None}
+    plan["drift"] = drift_summary
+    if getattr(args, "ablate", False):
+        # Drift accountability: rebuild the same capture with correction off and
+        # report the ON/OFF delta on the stitched footprint.
+        off_state = fuse_capture(cap, args.target_frames, args.target_points, drift=False)
+        off_lo = off_state["xy"].min(0) - .08
+        off_hi = off_state["xy"].max(0) + .08
+        off_shape = (int(math.ceil((off_hi[1]-off_lo[1])*SAM_PPM)), int(math.ceil((off_hi[0]-off_lo[0])*SAM_PPM)))
+        off_faces, _ = wall_faces(off_state)
+        off_bar, _ = physical_wall_barriers(off_faces, off_lo, off_shape, SAM_PPM)
+        off_support = indoor_support(off_state, off_lo, off_shape, SAM_PPM)
+        off_comp = room_components(off_support, off_bar, SAM_PPM)
+        off_top = (255-255*np.log1p(occupancy(off_state["xy"], off_lo, off_shape, SAM_PPM)) /
+                   max(np.log1p(occupancy(off_state["xy"], off_lo, off_shape, SAM_PPM).max()), 1e-6)).astype(np.uint8)
+        off_p, off_s, _ = sam_refine(off_top, off_support, off_comp, ckpt)
+        off_lab, _, _ = select_sam_rooms(off_comp, off_p, off_s, SAM_PPM)
+        off_rooms = polygonize(off_lab, off_lo, SAM_PPM, off_faces)
+        off_area = sum(r["area"] for r in off_rooms)
+        on_area = sum(r["area"] for r in rooms)
+        drift_summary["ablation"] = {
+            "rooms_with_correction": len(rooms), "rooms_without_correction": len(off_rooms),
+            "area_with_correction_m2": round(on_area, 3), "area_without_correction_m2": round(off_area, 3),
+            "area_delta_m2": round(on_area - off_area, 3),
+            "area_delta_pct": round(100.0 * (on_area - off_area) / max(off_area, 1e-9), 2),
+            "faces_with": len(faces), "faces_without": len(off_faces),
+        }
+        print(f"drift ablation: {drift_summary['ablation']}")
     (out/"plan.json").write_text(json.dumps(plan,indent=2)+"\n")
     render_plan(plan,out/"plan.png"); diagnostic(topdown,labels,out/"room_evidence.png")
     results={"experiment":"final_floorplan_cli_lidar","input":str(root),"n_metric_points":len(state["P"]),"n_wall_faces":len(faces),"n_paired_wall_bodies":len(wall_bodies),"n_room_candidates":n,"n_rooms":len(rooms),"areas_m2":[round(r["area"],2) for r in rooms],"sam_mode":sam_mode,"sam_candidates":sam_candidates,"runtime_s":round(time.time()-started,2),"artifacts":["plan.json","plan.png","room_evidence.png"]}
